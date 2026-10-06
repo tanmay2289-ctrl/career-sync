@@ -7,22 +7,15 @@ import com.careersync.service.AiService;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -35,9 +28,6 @@ public class ResumeController {
 
     private final ResumeRepository resumeRepository;
     private final AiService aiService;
-
-    @Value("${app.upload.dir:uploads}")
-    private String uploadDir;
 
     public ResumeController(ResumeRepository resumeRepository, AiService aiService) {
         this.resumeRepository = resumeRepository;
@@ -65,50 +55,19 @@ public class ResumeController {
         }
 
         try {
-            // Save file with absolute safe path
-            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
             String originalFilename = file.getOriginalFilename();
             String cleanName = (originalFilename != null && !originalFilename.isBlank())
                     ? Paths.get(originalFilename).getFileName().toString()
                     : "resume.pdf";
 
-            String savedFileName = UUID.randomUUID() + "_" + cleanName;
-            Path filePath = uploadPath.resolve(savedFileName);
-
-            try (InputStream in = file.getInputStream()) {
-                Files.copy(in, filePath, StandardCopyOption.REPLACE_EXISTING);
-            }
-
-            // Extract text from document (.pdf, .docx, .txt)
-            String extractedText = "";
-            String lowerName = cleanName.toLowerCase();
-            if (lowerName.endsWith(".pdf")) {
-                try (PDDocument doc = Loader.loadPDF(filePath.toFile())) {
-                    PDFTextStripper stripper = new PDFTextStripper();
-                    extractedText = stripper.getText(doc);
-                } catch (Exception ex) {
-                    System.err.println("Warning: could not extract text from PDF: " + ex.getMessage());
-                }
-            } else if (lowerName.endsWith(".docx")) {
-                extractedText = extractDocxText(filePath.toFile());
-            } else if (lowerName.endsWith(".txt")) {
-                try {
-                    extractedText = Files.readString(filePath, StandardCharsets.UTF_8);
-                } catch (Exception ignored) {
-                }
-            }
-
-            // Accurate skill extraction with word boundary pattern matching
+            // Extract text fully in-memory (no disk writes — safe for Render's ephemeral filesystem)
+            String extractedText = extractTextInMemory(file, cleanName);
             List<String> skills = extractSkills(extractedText);
 
             Resume resume = new Resume();
             resume.setUserId(p.getUserId());
             resume.setFileName(cleanName);
-            resume.setFileUrl("/uploads/" + savedFileName);
+            resume.setFileUrl(null); // No disk storage on cloud
             resume.setExtractedText(extractedText);
             resume.setExtractedSkills(skills);
             resume.setUploadedAt(LocalDateTime.now());
@@ -119,8 +78,32 @@ public class ResumeController {
         }
     }
 
-    private String extractDocxText(File file) {
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
+    /**
+     * Extract text from a multipart file entirely in memory.
+     * Avoids disk writes — safe for ephemeral cloud filesystems (Render, Railway, etc.)
+     */
+    private String extractTextInMemory(MultipartFile file, String cleanName) throws IOException {
+        String lowerName = cleanName.toLowerCase();
+        byte[] bytes = file.getBytes();
+
+        if (lowerName.endsWith(".pdf")) {
+            try (PDDocument doc = Loader.loadPDF(bytes)) {
+                PDFTextStripper stripper = new PDFTextStripper();
+                return stripper.getText(doc);
+            } catch (Exception ex) {
+                System.err.println("Warning: could not extract text from PDF: " + ex.getMessage());
+                return "";
+            }
+        } else if (lowerName.endsWith(".docx")) {
+            return extractDocxTextFromBytes(bytes);
+        } else if (lowerName.endsWith(".txt")) {
+            return new String(bytes, StandardCharsets.UTF_8);
+        }
+        return "";
+    }
+
+    private String extractDocxTextFromBytes(byte[] bytes) {
+        try (ZipInputStream zis = new ZipInputStream(new java.io.ByteArrayInputStream(bytes))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if ("word/document.xml".equals(entry.getName())) {
@@ -139,7 +122,6 @@ public class ResumeController {
             return new ArrayList<>();
         }
 
-        // Skills mapped to their accurate regex word-boundary patterns
         Map<String, String> skillPatterns = new LinkedHashMap<>();
         skillPatterns.put("Java", "\\bJava\\b");
         skillPatterns.put("Python", "\\bPython\\b");
@@ -191,7 +173,6 @@ public class ResumeController {
         for (Map.Entry<String, String> entry : skillPatterns.entrySet()) {
             Pattern p;
             if (entry.getKey().equals("C")) {
-                // Case sensitive for single letter C to avoid matching random lowercase c
                 p = Pattern.compile(entry.getValue());
             } else {
                 p = Pattern.compile(entry.getValue(), Pattern.CASE_INSENSITIVE);

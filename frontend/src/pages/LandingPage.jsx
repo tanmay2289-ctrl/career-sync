@@ -1,9 +1,12 @@
+import { Suspense, lazy } from 'react'
 import { Link } from 'react-router-dom'
 import {
   TrendingUp, Code2, FileText, Zap, Bot,
-  Briefcase, Target, Globe, ArrowRight, CheckCircle2
+  Briefcase, Target, Globe, ArrowRight, CheckCircle2, Sparkles
 } from 'lucide-react'
 import { Github } from '../components/Icons'
+
+const Spline = lazy(() => import('@splinetool/react-spline'))
 
 const features = [
   { icon: FileText,  title: 'Smart Resume Analysis',   desc: 'Upload your resume and get AI-powered insights, skill extraction, and improvement recommendations instantly.' },
@@ -32,79 +35,118 @@ const steps = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white font-sans">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[#0a0a0f] font-sans text-white overflow-x-hidden">
+      {/* ── Navbar ── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
+        style={{ background: 'rgba(10,10,15,0.7)', backdropFilter: 'blur(20px)' }}>
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
               <TrendingUp size={16} className="text-white" />
             </div>
-            <span className="font-bold text-slate-900 text-[15px]">Career Sync</span>
+            <span className="font-bold text-white text-[15px] tracking-tight">Career Sync</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/auth" className="text-sm text-slate-600 hover:text-slate-900 font-medium px-3 py-1.5">
+            <Link to="/auth"
+              className="text-sm text-white/60 hover:text-white transition-colors font-medium px-3 py-1.5">
               Sign In
             </Link>
-            <Link to="/auth?mode=signup" className="btn btn-primary btn-sm">
+            <Link to="/auth?mode=signup"
+              className="text-sm font-semibold px-4 py-2 rounded-xl transition-all text-white"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
               Get Started
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-slate-50 pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+      {/* ── Hero with Spline ── */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center pt-16 overflow-hidden">
+        {/* Spline 3D background */}
+        <div className="absolute inset-0 z-0">
+          <Suspense fallback={
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
+            <Spline
+              scene="https://prod.spline.design/1e75aeea-f141-4b1e-a7ff-5f305a470b23/scene.splinecode"
+              style={{ width: '100%', height: '100%' }}
+            />
+          </Suspense>
+        </div>
 
-        <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 text-center">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 border border-blue-100">
-            <Bot size={12} />
+        {/* Gradient overlay so text stays readable */}
+        <div className="absolute inset-0 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, rgba(10,10,15,0.3) 0%, rgba(10,10,15,0.15) 50%, rgba(10,10,15,0.85) 100%)' }} />
+
+        {/* Hero content */}
+        <div className="relative z-20 max-w-4xl mx-auto px-6 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6 border border-indigo-500/30"
+            style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>
+            <Sparkles size={12} />
             Powered by Gemini AI · Built for Students
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-slate-900 leading-[1.1] mb-6 tracking-tight">
+          <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.05] mb-6 tracking-tight">
             Your AI-Powered<br />
-            <span className="text-blue-600">Career Command Center</span>
+            <span style={{ background: 'linear-gradient(135deg,#6366f1,#a78bfa,#38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Career Command Center
+            </span>
           </h1>
 
-          <p className="text-lg text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Manage your resume, skills, GitHub, LeetCode, projects, applications, and goals — 
-            all in one place. Let AI identify your gaps and guide your career journey.
+          <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Manage your resume, skills, GitHub, LeetCode, projects, applications, and goals —
+            all in one place. Let AI identify your gaps and guide your journey.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link to="/auth?mode=signup" className="btn btn-primary btn-lg gap-2">
-              Start for Free <ArrowRight size={18} />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+            <Link to="/auth?mode=signup"
+              className="flex items-center gap-2 text-white font-semibold px-8 py-3.5 rounded-xl transition-all hover:opacity-90 hover:scale-[1.02] text-sm shadow-lg"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 0 30px rgba(99,102,241,0.4)' }}>
+              Start for Free <ArrowRight size={17} />
             </Link>
-            <Link to="/auth" className="btn btn-secondary btn-lg">
+            <Link to="/auth"
+              className="flex items-center gap-2 text-white/80 font-semibold px-8 py-3.5 rounded-xl border border-white/10 hover:border-white/20 hover:bg-white/5 transition-all text-sm">
               Sign In
             </Link>
           </div>
 
-          {/* Stats row */}
-          <div className="flex flex-wrap justify-center gap-8">
+          {/* Stats */}
+          <div className="flex flex-wrap justify-center gap-10">
             {stats.map((s) => (
               <div key={s.label} className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{s.value}</div>
-                <div className="text-xs text-slate-500 font-medium mt-0.5">{s.label}</div>
+                <div className="text-3xl font-extrabold"
+                  style={{ background: 'linear-gradient(135deg,#6366f1,#a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  {s.value}
+                </div>
+                <div className="text-xs text-white/40 font-medium mt-1">{s.label}</div>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Scroll cue */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-bounce">
+          <div className="w-6 h-10 rounded-full border border-white/20 flex items-start justify-center pt-2">
+            <div className="w-1 h-2.5 rounded-full bg-white/40" />
+          </div>
+        </div>
       </section>
 
-      {/* Problem → Solution */}
-      <section className="py-20 bg-slate-50">
+      {/* ── Problem → Solution ── */}
+      <section className="py-24 relative">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 70%)' }} />
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-red-50 text-red-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 border border-red-100">
+            <div className="p-8 rounded-2xl border border-red-500/10"
+              style={{ background: 'rgba(239,68,68,0.04)' }}>
+              <div className="inline-flex items-center gap-2 bg-red-500/10 text-red-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 border border-red-500/20">
                 The Problem
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-5">
+              <h2 className="text-2xl font-bold text-white mb-5">
                 Career info scattered across too many platforms
               </h2>
               <div className="space-y-3">
@@ -115,20 +157,22 @@ export default function LandingPage() {
                   'GitHub and LeetCode progress not connected',
                   'No single view of career readiness',
                 ].map((p) => (
-                  <div key={p} className="flex items-center gap-3 text-slate-600 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-red-500 text-xs">✗</span>
+                  <div key={p} className="flex items-center gap-3 text-white/50 text-sm">
+                    <div className="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                      <span className="text-red-400 text-xs">✗</span>
                     </div>
                     {p}
                   </div>
                 ))}
               </div>
             </div>
-            <div>
-              <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 border border-green-100">
+
+            <div className="p-8 rounded-2xl border border-indigo-500/10"
+              style={{ background: 'rgba(99,102,241,0.04)' }}>
+              <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 border border-indigo-500/20">
                 Career Sync Solution
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-5">
+              <h2 className="text-2xl font-bold text-white mb-5">
                 Everything in one intelligent platform
               </h2>
               <div className="space-y-3">
@@ -139,8 +183,8 @@ export default function LandingPage() {
                   'GitHub + LeetCode stats on your dashboard',
                   'Career readiness score with actionable advice',
                 ].map((s) => (
-                  <div key={s} className="flex items-center gap-3 text-slate-600 text-sm">
-                    <CheckCircle2 size={18} className="text-green-500 flex-shrink-0" />
+                  <div key={s} className="flex items-center gap-3 text-white/60 text-sm">
+                    <CheckCircle2 size={18} className="text-indigo-400 flex-shrink-0" />
                     {s}
                   </div>
                 ))}
@@ -150,77 +194,89 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* ── Features Grid ── */}
       <section className="py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">
-              Everything you need to accelerate your career
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
+              Everything to accelerate your career
             </h2>
-            <p className="text-slate-500 text-lg max-w-xl mx-auto">
-              8 powerful modules built for students and job seekers, all powered by Gemini AI.
+            <p className="text-white/40 text-lg max-w-xl mx-auto">
+              8 powerful modules built for students, all powered by Gemini AI.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {features.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="card p-5 group">
-                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
-                  <Icon size={20} className="text-blue-600" />
+              <div key={title}
+                className="p-5 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all group cursor-default"
+                style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-110"
+                  style={{ background: 'rgba(99,102,241,0.15)' }}>
+                  <Icon size={20} className="text-indigo-400" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-900 mb-2">{title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+                <h3 className="text-sm font-semibold text-white mb-2">{title}</h3>
+                <p className="text-xs text-white/40 leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20 bg-slate-50">
+      {/* ── How It Works ── */}
+      <section className="py-24 relative">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.06) 0%, transparent 70%)' }} />
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-slate-900 mb-3">How it works</h2>
-            <p className="text-slate-500">Get started in minutes, see results immediately.</p>
+            <h2 className="text-3xl font-extrabold text-white mb-3">How it works</h2>
+            <p className="text-white/40">Get started in minutes, see results immediately.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {steps.map(({ n, title, desc }) => (
-              <div key={n} className="text-center">
-                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-sm">
+              <div key={n} className="text-center group">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-extrabold text-sm transition-all group-hover:scale-110"
+                  style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 0 20px rgba(99,102,241,0.3)' }}>
                   {n}
                 </div>
-                <h3 className="text-sm font-semibold text-slate-900 mb-2">{title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+                <h3 className="text-sm font-semibold text-white mb-2">{title}</h3>
+                <p className="text-xs text-white/40 leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-blue-600">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to take control of your career?
+      {/* ── CTA ── */}
+      <section className="py-28 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%)' }} />
+        <div className="absolute inset-0 pointer-events-none border-t border-b border-indigo-500/10" />
+        <div className="relative max-w-3xl mx-auto px-6 text-center">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-5">
+            Ready to take control<br />of your career?
           </h2>
-          <p className="text-blue-100 mb-8 text-lg">
+          <p className="text-white/50 mb-10 text-lg">
             Join Career Sync and get AI-powered career guidance tailored to your goals.
           </p>
-          <Link to="/auth?mode=signup" className="inline-flex items-center gap-2 bg-white text-blue-600 font-semibold px-8 py-3.5 rounded-xl hover:bg-blue-50 transition-colors text-sm">
-            Get Started Free <ArrowRight size={16} />
+          <Link to="/auth?mode=signup"
+            className="inline-flex items-center gap-2 text-white font-semibold px-10 py-4 rounded-xl hover:opacity-90 hover:scale-[1.02] transition-all text-sm"
+            style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 0 40px rgba(99,102,241,0.4)' }}>
+            Get Started Free <ArrowRight size={17} />
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 border-t border-slate-100">
+      {/* ── Footer ── */}
+      <footer className="py-8 border-t border-white/5">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center">
+            <div className="w-6 h-6 rounded-md flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
               <TrendingUp size={12} className="text-white" />
             </div>
-            <span className="text-sm font-semibold text-slate-700">Career Sync</span>
+            <span className="text-sm font-semibold text-white/70">Career Sync</span>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-white/30">
             Built with React + Spring Boot + Gemini AI · College Project
           </p>
         </div>

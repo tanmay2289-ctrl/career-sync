@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import AppLayout from './components/AppLayout'
 
 import LandingPage   from './pages/LandingPage'
+import AboutPage     from './pages/AboutPage'
 import AuthPage      from './pages/AuthPage'
 import Dashboard     from './pages/Dashboard'
 import ProfilePage   from './pages/ProfilePage'
@@ -42,6 +43,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/about" element={<AboutPage />} />
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
 
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
